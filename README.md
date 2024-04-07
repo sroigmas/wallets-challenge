@@ -13,6 +13,8 @@
 ./mvnw clean install
 ./mvnw spring-boot:run
 ````
+You can test the GET endpoint like this:
+http://localhost:8090/api/v1/wallets/3ad80683-bc0a-483a-9e24-a7d0fff1c090
 
 ## How to run tests
 

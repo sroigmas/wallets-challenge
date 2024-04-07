@@ -1,9 +1,10 @@
 package com.playtomic.tests.wallet.application.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
+import com.playtomic.tests.wallet.application.exception.ApplicationNotFoundException;
 import com.playtomic.tests.wallet.application.port.input.FindWalletUseCase.FindWalletQuery;
 import com.playtomic.tests.wallet.application.port.output.WalletRepository;
 import com.playtomic.tests.wallet.domain.Wallet;
@@ -27,13 +28,12 @@ class FindWalletServiceTest {
   void givenWalletId_whenFindingWallet_thenWalletExists() {
     UUID id = UUID.randomUUID();
     FindWalletQuery findWalletQuery = FindWalletQuery.builder().id(id).build();
-    Wallet wallet = buildWallet(id, BigDecimal.valueOf(12.5));
-    when(walletRepository.findWalletById(findWalletQuery)).thenReturn(Optional.of(wallet));
+    Wallet expectedWallet = buildWallet(id, BigDecimal.valueOf(12.5));
+    when(walletRepository.findWalletById(findWalletQuery)).thenReturn(Optional.of(expectedWallet));
 
-    Optional<Wallet> walletOpt = findWalletService.findWalletById(findWalletQuery);
+    Wallet actualWallet = findWalletService.findWalletById(findWalletQuery);
 
-    assertTrue(walletOpt.isPresent());
-    assertEquals(wallet, walletOpt.get());
+    assertEquals(expectedWallet, actualWallet);
   }
 
   @Test
@@ -42,9 +42,9 @@ class FindWalletServiceTest {
     FindWalletQuery findWalletQuery = FindWalletQuery.builder().id(id).build();
     when(walletRepository.findWalletById(findWalletQuery)).thenReturn(Optional.empty());
 
-    Optional<Wallet> walletOpt = findWalletService.findWalletById(findWalletQuery);
-
-    assertTrue(walletOpt.isEmpty());
+    assertThrows(
+        ApplicationNotFoundException.class,
+        () -> findWalletService.findWalletById(findWalletQuery));
   }
 
   private Wallet buildWallet(UUID id, BigDecimal balance) {
