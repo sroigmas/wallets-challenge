@@ -29,7 +29,7 @@ class WalletDbRepositoryTest {
   @InjectMocks private WalletDbRepository walletDbRepository;
 
   @Test
-  void givenWalletId_whenFindingWallet_thenWalletIsReturned() {
+  void givenWalletId_whenFindingWallet_thenReturnsWallet() {
     UUID id = UUID.randomUUID();
     BigDecimal balance = BigDecimal.valueOf(12.5);
 
