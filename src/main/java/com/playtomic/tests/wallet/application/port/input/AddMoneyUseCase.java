@@ -15,5 +15,6 @@ public interface AddMoneyUseCase {
   class AddMoneyCommand {
     UUID id;
     BigDecimal amount;
+    String creditCardNumber;
   }
 }

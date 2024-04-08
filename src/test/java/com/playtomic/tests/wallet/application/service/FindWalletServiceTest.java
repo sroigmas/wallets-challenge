@@ -29,7 +29,7 @@ class FindWalletServiceTest {
     UUID id = UUID.randomUUID();
     FindWalletQuery findWalletQuery = FindWalletQuery.builder().id(id).build();
     Wallet expectedWallet = buildWallet(id, BigDecimal.valueOf(12.5));
-    when(walletRepository.findWalletById(findWalletQuery)).thenReturn(Optional.of(expectedWallet));
+    when(walletRepository.findWalletById(id)).thenReturn(Optional.of(expectedWallet));
 
     Wallet actualWallet = findWalletService.findWalletById(findWalletQuery);
 
@@ -40,7 +40,7 @@ class FindWalletServiceTest {
   void givenNonExistingWallet_whenFindingWallet_thenWalletDoesntExist() {
     UUID id = UUID.randomUUID();
     FindWalletQuery findWalletQuery = FindWalletQuery.builder().id(id).build();
-    when(walletRepository.findWalletById(findWalletQuery)).thenReturn(Optional.empty());
+    when(walletRepository.findWalletById(id)).thenReturn(Optional.empty());
 
     assertThrows(
         ApplicationNotFoundException.class,

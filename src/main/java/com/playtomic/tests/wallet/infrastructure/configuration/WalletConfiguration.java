@@ -1,5 +1,6 @@
 package com.playtomic.tests.wallet.infrastructure.configuration;
 
+import com.playtomic.tests.wallet.application.port.output.PaymentRepository;
 import com.playtomic.tests.wallet.application.port.output.WalletRepository;
 import com.playtomic.tests.wallet.application.service.AddMoneyService;
 import com.playtomic.tests.wallet.application.service.FindWalletService;
@@ -15,7 +16,8 @@ public class WalletConfiguration {
   }
 
   @Bean
-  public AddMoneyService addMoneyService() {
-    return new AddMoneyService();
+  public AddMoneyService addMoneyService(
+      final PaymentRepository paymentRepository, final WalletRepository walletRepository) {
+    return new AddMoneyService(paymentRepository, walletRepository);
   }
 }

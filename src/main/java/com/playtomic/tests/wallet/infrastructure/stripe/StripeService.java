@@ -1,6 +1,10 @@
-package com.playtomic.tests.wallet.service;
+package com.playtomic.tests.wallet.infrastructure.stripe;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.playtomic.tests.wallet.application.port.output.PaymentRepository;
+import com.playtomic.tests.wallet.service.Payment;
+import com.playtomic.tests.wallet.service.StripeRestTemplateResponseErrorHandler;
+import com.playtomic.tests.wallet.service.StripeServiceException;
 import java.math.BigDecimal;
 import java.net.URI;
 import lombok.AllArgsConstructor;
@@ -17,7 +21,7 @@ import org.springframework.web.client.RestTemplate;
  * throws an error when trying to charge less than 10€.
  */
 @Service
-public class StripeService {
+public class StripeService implements PaymentRepository {
 
   @NonNull private URI chargesUri;
 

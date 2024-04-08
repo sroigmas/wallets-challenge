@@ -12,7 +12,7 @@ import static org.mockito.Mockito.when;
 import com.playtomic.tests.wallet.service.Payment;
 import com.playtomic.tests.wallet.service.StripeAmountTooSmallException;
 import com.playtomic.tests.wallet.service.StripeRestTemplateResponseErrorHandler;
-import com.playtomic.tests.wallet.service.StripeService;
+import com.playtomic.tests.wallet.infrastructure.stripe.StripeService;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.URI;
@@ -82,7 +82,8 @@ class StripeServiceTest {
         .when(restTemplate)
         .postForObject(
             eq(chargesUri),
-            any(Class.forName("com.playtomic.tests.wallet.service.StripeService$ChargeRequest")),
+            any(Class.forName(
+                "com.playtomic.tests.wallet.infrastructure.stripe.StripeService$ChargeRequest")),
             eq(Payment.class));
 
     assertThrows(

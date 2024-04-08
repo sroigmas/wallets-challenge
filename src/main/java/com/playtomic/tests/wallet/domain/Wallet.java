@@ -14,4 +14,8 @@ import lombok.NoArgsConstructor;
 public class Wallet {
   private UUID id;
   private BigDecimal balance;
+
+  public Wallet addMoney(BigDecimal amount) {
+    return new Wallet(id, balance.add(amount));
+  }
 }

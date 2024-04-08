@@ -14,7 +14,7 @@ public class FindWalletService implements FindWalletUseCase {
   @Override
   public Wallet findWalletById(FindWalletQuery findWalletQuery) {
     return walletRepository
-        .findWalletById(findWalletQuery)
+        .findWalletById(findWalletQuery.getId())
         .orElseThrow(() -> new ApplicationNotFoundException(String.format(
             "Wallet with id=%s could not be found.",
             findWalletQuery.getId())));

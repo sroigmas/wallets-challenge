@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import com.playtomic.tests.wallet.application.port.input.FindWalletUseCase.FindWalletQuery;
 import com.playtomic.tests.wallet.domain.Wallet;
 import com.playtomic.tests.wallet.infrastructure.configuration.MapperConfiguration;
 import com.playtomic.tests.wallet.infrastructure.jpa.WalletDbRepository;
@@ -33,11 +32,10 @@ class WalletDbRepositoryTest {
     UUID id = UUID.randomUUID();
     BigDecimal balance = BigDecimal.valueOf(12.5);
 
-    FindWalletQuery findWalletQuery = FindWalletQuery.builder().id(id).build();
     WalletEntity walletEntity = WalletEntity.builder().id(id).balance(balance).build();
     when(walletJpaRepository.findById(id)).thenReturn(Optional.of(walletEntity));
 
-    Optional<Wallet> walletOpt = walletDbRepository.findWalletById(findWalletQuery);
+    Optional<Wallet> walletOpt = walletDbRepository.findWalletById(id);
 
     assertTrue(walletOpt.isPresent());
     assertEquals(walletEntity.getId(), walletOpt.get().getId());
