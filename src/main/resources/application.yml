@@ -13,3 +13,6 @@ spring:
   h2:
     console:
       enabled: true
+
+springdoc:
+  paths-to-match: /api/**

@@ -13,6 +13,11 @@
 ./mvnw clean install
 ./mvnw spring-boot:run
 ````
+You can check the OpenAPI documentation:
+- Using Swagger UI: http://localhost:8090/swagger-ui/index.html
+- In JSON format: http://localhost:8090/v3/api-docs
+- In YAML format: http://localhost:8090/v3/api-docs.yaml
+
 You can test the GET endpoint like this:
 http://localhost:8090/api/v1/wallets/3ad80683-bc0a-483a-9e24-a7d0fff1c090
 
