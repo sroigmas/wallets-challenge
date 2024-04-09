@@ -9,15 +9,17 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.playtomic.tests.wallet.domain.Payment;
+import com.playtomic.tests.wallet.infrastructure.stripe.PaymentResponse;
+import com.playtomic.tests.wallet.infrastructure.stripe.StripeRestTemplateResponseErrorHandler;
 import com.playtomic.tests.wallet.infrastructure.stripe.StripeService;
-import com.playtomic.tests.wallet.service.Payment;
-import com.playtomic.tests.wallet.service.StripeAmountTooSmallException;
-import com.playtomic.tests.wallet.service.StripeRestTemplateResponseErrorHandler;
+import com.playtomic.tests.wallet.infrastructure.stripe.exception.StripeAmountTooSmallException;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.URI;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.client.MockClientHttpResponse;
@@ -34,21 +36,28 @@ class StripeServiceTest {
 
   private final RestTemplateBuilder restTemplateBuilder = mock(RestTemplateBuilder.class);
 
+  private final ModelMapper modelMapper = new ModelMapper();
+
   @Test
   void givenPaymentData_whenCharging_thenCallsStripeService()
       throws NoSuchFieldException, IllegalAccessException {
     String creditCardNumber = "4242 4242 4242 4242";
     BigDecimal amount = new BigDecimal(15);
+    String paymentId = "a80a3835-b5d8-414b-a970-5c065a5a575a";
 
     RestTemplate restTemplate = mock(RestTemplate.class);
+    when(restTemplate.postForObject(eq(chargesUri), any(Object.class), eq(PaymentResponse.class)))
+        .thenReturn(new PaymentResponse(paymentId));
     when(restTemplateBuilder.errorHandler(any())).thenReturn(restTemplateBuilder);
     when(restTemplateBuilder.build()).thenReturn(restTemplate);
-    StripeService stripeService = new StripeService(chargesUri, refundsUri, restTemplateBuilder);
+    StripeService stripeService =
+        new StripeService(chargesUri, refundsUri, restTemplateBuilder, modelMapper);
 
-    stripeService.charge(creditCardNumber, amount);
+    Payment payment = stripeService.charge(creditCardNumber, amount);
 
     ArgumentCaptor<Object> requestCaptor = ArgumentCaptor.forClass(Object.class);
-    verify(restTemplate).postForObject(eq(chargesUri), requestCaptor.capture(), eq(Payment.class));
+    verify(restTemplate)
+        .postForObject(eq(chargesUri), requestCaptor.capture(), eq(PaymentResponse.class));
 
     Object request = requestCaptor.getValue();
     Field creditCardNumberfield = request.getClass().getDeclaredField("creditCardNumber");
@@ -58,6 +67,7 @@ class StripeServiceTest {
 
     assertEquals(creditCardNumber, creditCardNumberfield.get(request));
     assertEquals(amount, amountfield.get(request));
+    assertEquals(payment.getId(), paymentId);
   }
 
   @Test
@@ -69,7 +79,8 @@ class StripeServiceTest {
     RestTemplate restTemplate = mock(RestTemplate.class);
     when(restTemplateBuilder.errorHandler(any())).thenReturn(restTemplateBuilder);
     when(restTemplateBuilder.build()).thenReturn(restTemplate);
-    StripeService stripeService = new StripeService(chargesUri, refundsUri, restTemplateBuilder);
+    StripeService stripeService =
+        new StripeService(chargesUri, refundsUri, restTemplateBuilder, modelMapper);
 
     doAnswer(
             invocationOnMock -> {
@@ -82,9 +93,10 @@ class StripeServiceTest {
         .when(restTemplate)
         .postForObject(
             eq(chargesUri),
-            any(Class.forName(
-                "com.playtomic.tests.wallet.infrastructure.stripe.StripeService$ChargeRequest")),
-            eq(Payment.class));
+            any(
+                Class.forName(
+                    "com.playtomic.tests.wallet.infrastructure.stripe.StripeService$ChargeRequest")),
+            eq(PaymentResponse.class));
 
     assertThrows(
         StripeAmountTooSmallException.class, () -> stripeService.charge(creditCardNumber, amount));

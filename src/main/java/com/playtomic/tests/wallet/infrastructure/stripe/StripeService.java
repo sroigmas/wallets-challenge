@@ -2,13 +2,13 @@ package com.playtomic.tests.wallet.infrastructure.stripe;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.playtomic.tests.wallet.application.port.output.PaymentRepository;
-import com.playtomic.tests.wallet.service.Payment;
-import com.playtomic.tests.wallet.service.StripeRestTemplateResponseErrorHandler;
-import com.playtomic.tests.wallet.service.StripeServiceException;
+import com.playtomic.tests.wallet.domain.Payment;
+import com.playtomic.tests.wallet.infrastructure.stripe.exception.StripeServiceException;
 import java.math.BigDecimal;
 import java.net.URI;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
@@ -29,14 +29,18 @@ public class StripeService implements PaymentRepository {
 
   @NonNull private RestTemplate restTemplate;
 
+  private ModelMapper modelMapper;
+
   public StripeService(
       @Value("${stripe.simulator.charges-uri}") @NonNull URI chargesUri,
       @Value("${stripe.simulator.refunds-uri}") @NonNull URI refundsUri,
-      @NonNull RestTemplateBuilder restTemplateBuilder) {
+      @NonNull RestTemplateBuilder restTemplateBuilder,
+      ModelMapper modelMapper) {
     this.chargesUri = chargesUri;
     this.refundsUri = refundsUri;
     this.restTemplate =
         restTemplateBuilder.errorHandler(new StripeRestTemplateResponseErrorHandler()).build();
+    this.modelMapper = modelMapper;
   }
 
   /**
@@ -51,7 +55,9 @@ public class StripeService implements PaymentRepository {
   public Payment charge(@NonNull String creditCardNumber, @NonNull BigDecimal amount)
       throws StripeServiceException {
     ChargeRequest body = new ChargeRequest(creditCardNumber, amount);
-    return restTemplate.postForObject(chargesUri, body, Payment.class);
+    PaymentResponse paymentResponse =
+        restTemplate.postForObject(chargesUri, body, PaymentResponse.class);
+    return modelMapper.map(paymentResponse, Payment.class);
   }
 
   /** Refunds the specified payment. */
