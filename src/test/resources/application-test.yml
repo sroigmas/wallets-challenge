@@ -2,5 +2,5 @@ spring:
   config:
     activate:
       on-profile: test
-stripe.simulator.charges-uri: http://localhost:9999
-stripe.simulator.refunds-uri: http://localhost:9999
+stripe.simulator.charges-uri: http://localhost:9999/v1/stripe-simulator/charges
+stripe.simulator.refunds-uri: http://localhost:9999/v1/stripe-simulator/payments/{payment_id}/refunds
