@@ -23,6 +23,8 @@ public class WalletDbRepository implements WalletRepository {
 
   @Override
   public Wallet updateWallet(Wallet wallet) {
-    return null;
+    WalletEntity walletEntity = modelMapper.map(wallet, WalletEntity.class);
+    WalletEntity savedWalletEntity = walletJpaRepository.save(walletEntity);
+    return modelMapper.map(savedWalletEntity, Wallet.class);
   }
 }

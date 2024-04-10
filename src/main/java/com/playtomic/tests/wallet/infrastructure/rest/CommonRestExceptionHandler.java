@@ -2,9 +2,11 @@ package com.playtomic.tests.wallet.infrastructure.rest;
 
 import com.playtomic.tests.wallet.application.exception.ApplicationNotFoundException;
 import com.playtomic.tests.wallet.infrastructure.exception.InfrastructureExternalException;
+import com.playtomic.tests.wallet.infrastructure.exception.InfrastructureValidationException;
 import com.playtomic.tests.wallet.infrastructure.stripe.exception.StripeServiceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -21,6 +23,22 @@ public class CommonRestExceptionHandler {
     String message = e.getName() + " should be of type " + e.getRequiredType().getName();
     log.error(message);
     return new ErrorResponse(HttpStatus.BAD_REQUEST, message);
+  }
+
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ErrorResponse handleMethodArgumentNotValidExceptions(
+      MethodArgumentNotValidException e) {
+    log.error(e.getMessage());
+    return new ErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+  }
+
+  @ExceptionHandler(InfrastructureValidationException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ErrorResponse handleInfrastructureValidationExceptions(
+      InfrastructureValidationException e) {
+    log.error(e.getMessage());
+    return new ErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
   }
 
   @ExceptionHandler(ApplicationNotFoundException.class)
