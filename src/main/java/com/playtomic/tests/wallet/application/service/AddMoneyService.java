@@ -7,6 +7,7 @@ import com.playtomic.tests.wallet.application.port.output.WalletRepository;
 import com.playtomic.tests.wallet.domain.Payment;
 import com.playtomic.tests.wallet.domain.Wallet;
 import com.playtomic.tests.wallet.infrastructure.exception.InfrastructureExternalException;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,31 +21,36 @@ public class AddMoneyService implements AddMoneyUseCase {
 
   @Override
   public Wallet addMoney(AddMoneyCommand addMoneyCommand) {
+    UUID walletId = addMoneyCommand.getId();
+
     Wallet wallet =
         walletRepository
-            .findWalletById(addMoneyCommand.getId())
+            .findWalletById(walletId)
             .orElseThrow(
                 () ->
                     new ApplicationNotFoundException(
-                        String.format(
-                            "Wallet with id=%s could not be found.", addMoneyCommand.getId())));
+                        String.format("Wallet with id=%s could not be found.", walletId)));
 
     Payment payment =
         paymentRepository.charge(
             addMoneyCommand.getCreditCardNumber(), addMoneyCommand.getAmount());
+    log.info(
+        String.format(
+            "Payment with id=%s charged for wallet with id=%s", payment.getId(), walletId));
 
     Wallet newWallet = wallet.addMoney(addMoneyCommand.getAmount());
 
     try {
-      walletRepository.updateWallet(newWallet);
+      newWallet = walletRepository.updateWallet(newWallet);
+      log.info(String.format("Wallet updated with id=%s", walletId));
     } catch (Exception e) {
       log.warn(
           String.format(
               "Refunding payment with id=%s due to an error while updating wallet with id=%s",
-              payment.getId(), newWallet.getId()));
+              payment.getId(), walletId));
       paymentRepository.refund(payment.getId());
       throw new InfrastructureExternalException(
-          String.format("External error while updating wallet with id=%s.", newWallet.getId()));
+          String.format("External error while updating wallet with id=%s.", walletId));
     }
 
     return newWallet;
